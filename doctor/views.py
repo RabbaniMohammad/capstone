@@ -33,8 +33,42 @@ class Auth(APIView):
         response = {}
         data = request.data 
         checking = data.get("token")
-        if checking == "signup":
+        if data['message'] == "history":
+            response = {}
+            obj = Avail.objects.filter(email = data['email'])
+            payload = [] 
+            for i in obj:
+                    payload.append({
+                    "doctor_name":i.name,
+                    "email":i.email,
+                    "time":i.time,
+                    'patient_name':i.patientname,
+                    "issue":i.issue
+                    })
+            response['data'] = payload
+            return Response(response)
+    
+        if data['message'] == "spec":
+            payload = []
+            get_data = Doctors.objects.filter(specialization=data['spec'])
+            try:
+                for data in get_data: 
+                    payload.append({
+                    "id": data.id,
+                    "name": data.name, 
+                    "specialization":data.specialization, 
+                    "profile_pic": f"http://127.0.0.1:8000/images/{data.profilepic}"
+                    })
 
+                response['data'] = payload
+                response['message'] = "success"
+                return Response(response)
+            except Exception as e:
+                return Response({"message":"failed"})
+
+
+
+        if checking == "signup":
             email = data.get("email")
             obj = DoctorForm(data = request.data)
             check = Doctors.objects.filter(email = email)
@@ -49,25 +83,15 @@ class Auth(APIView):
                 return Response(obj.errors())
             except Exception as e:
                 return Response(obj.errors())
-        # email = data.get("email")
-        # password = data.get("password")
-        # try:
-        #     obj = Doctors.objects.get(email = email)
-        #     if obj.email == email and obj.password == password:
-        #         return Response({"message":200})
-        #     data = json.dumps({"hero":email,obj.password:password, "name":"rabbani"})
-        #     return Response({"message": data})
-        # except Exception as e:
-        #     return Response({"message":data}) 
-        eemail = data.get("email")
+        email = data.get("email")
         password = data.get("password")
         try:
-            obj = Patient.objects.get(email = email)
+            obj = Doctors.objects.get(email = email)
             if obj.email == email and obj.password == password:
                 response = {}
                 response['message'] = 200 
                 response['name'] = obj.name 
-            
+                response['email'] = obj.email
                 return Response(response)
             return Response({"message":"invalid credentials"})
         except Exception as e:
@@ -147,3 +171,18 @@ class History(APIView):
         except Exception as e:
             return Response({"message":"failed"})
 History = History.as_view()
+
+
+class Main(APIView):
+    def post(self, request):
+        response = {}
+        data = request.data
+        email = data['email']
+        obj = Doctors.objects.get(email = email)
+        response['user_name'] = obj.name 
+        response['user_spec'] = obj.specialization
+        response['user_email'] = obj.email 
+        response['img'] = f"http://127.0.0.1:8000/images/{obj.profilepic}"
+        return Response(response)
+
+Main = Main.as_view()

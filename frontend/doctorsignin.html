@@ -170,7 +170,11 @@
           .then((response) => response.json())
           .then((data) => {
             message = data["message"];
-            console.log("this",message)
+            mail = data['email']
+            doctor_user = {}
+            doctor_user['name'] = data.name 
+            doctor_user['mail'] = data.email
+            window.localStorage.setItem("user", JSON.stringify(doctor_user))
             if (message == 200) {
               window.location =
                 "http://127.0.0.1:5501/frontend/Doctorpage.html";
