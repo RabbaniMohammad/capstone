@@ -162,7 +162,7 @@
           url.append(pair[0], pair[1]);
         }
 
-
+        url.append("message","")
         fetch("http://localhost:8000/doctor/", {
           method: "POST",
           body: url
