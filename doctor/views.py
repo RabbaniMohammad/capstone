@@ -71,7 +71,10 @@ class Auth(APIView):
         if checking == "signup":
             email = data.get("email")
             obj = DoctorForm(data = request.data)
-            check = Doctors.objects.filter(email = email)
+            try:
+                check = Doctors.objects.filter(email = email)
+            except:
+                pass
             try:
                 if len(check) >= 1:
                     response['message'] = "account exists"
@@ -83,6 +86,7 @@ class Auth(APIView):
                 return Response(obj.errors())
             except Exception as e:
                 return Response(obj.errors())
+    
         email = data.get("email")
         password = data.get("password")
         try:
@@ -178,11 +182,15 @@ class Main(APIView):
         response = {}
         data = request.data
         email = data['email']
-        obj = Doctors.objects.get(email = email)
-        response['user_name'] = obj.name 
-        response['user_spec'] = obj.specialization
-        response['user_email'] = obj.email 
-        response['img'] = f"http://127.0.0.1:8000/images/{obj.profilepic}"
-        return Response(response)
+        try:
+            obj = Doctors.objects.get(email = email)
+            response['user_name'] = obj.name 
+            response['user_spec'] = obj.specialization
+            response['user_email'] = obj.email 
+            response['img'] = f"http://127.0.0.1:8000/images/{obj.profilepic}"
+            return Response(response)
+        except: 
+            return Response({"message":"failed"})
+        
 
 Main = Main.as_view()
